@@ -1,0 +1,38 @@
+
+# unordered_dense
+add_subdirectory(unordered_dense)
+set_property(TARGET unordered_dense PROPERTY FOLDER "ThirdParty")
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/unordered_dense/include/ankerl
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/ThirdParty
+)
+
+# SDL3
+if (NOT (EMSCRIPTEN OR ANDROID OR WINDOWS_STORE))
+    set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+    set(SDL_STATIC ON CACHE BOOL "" FORCE)
+    set(SDL_LIBC ON CACHE BOOL "" FORCE)
+    set(SDL_TIMERS ON CACHE BOOL "" FORCE)
+    set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
+    set(SDL_DISABLE_INSTALL ON CACHE BOOL "" FORCE)
+    set(SDL_DISABLE_INSTALL_DOCS ON CACHE BOOL "" FORCE)
+    # Disable everything we don't care about.
+    set(SDL_ATOMIC OFF CACHE BOOL "" FORCE)
+    set(SDL_AUDIO OFF CACHE BOOL "" FORCE)
+    set(SDL_RENDER OFF CACHE BOOL "" FORCE)
+    set(SDL_HAPTIC OFF CACHE BOOL "" FORCE)
+    set(SDL_POWER OFF CACHE BOOL "" FORCE)
+    set(SDL_FILE OFF CACHE BOOL "" FORCE)
+    set(SDL_CPUINFO OFF CACHE BOOL "" FORCE)
+    set(SDL_FILESYSTEM OFF CACHE BOOL "" FORCE)
+    set(SDL_SENSOR OFF CACHE BOOL "" FORCE)
+    set(SDL_LOCALE OFF CACHE BOOL "" FORCE)
+    set(SDL_MISC OFF CACHE BOOL "" FORCE)
+    set(SDL_CAMERA OFF CACHE BOOL "" FORCE)
+    set(SDL_GPU OFF CACHE BOOL "" FORCE)
+    set(SDL_DIALOG OFF CACHE BOOL "" FORCE)
+    add_subdirectory(SDL EXCLUDE_FROM_ALL)
+    set_property(TARGET "SDL3-static" PROPERTY FOLDER "ThirdParty")
+    if (SDL_SHARED)
+        set_property(TARGET "SDL_uclibc" PROPERTY FOLDER "ThirdParty")
+    endif ()
+endif()

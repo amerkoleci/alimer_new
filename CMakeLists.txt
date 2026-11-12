@@ -67,8 +67,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # Include common utilities
 include(GNUInstallDirs)
 include(CMakeDependentOption)
-include(CPM)
 include(FetchPackage)
+include(AlimerUtils)
 
 # Define standard configurations (Debug, Release, Distribution)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
@@ -139,6 +139,12 @@ endif ()
 # Options
 option(ALIMER_INSTALL "Generate the install target" ${ALIMER_MASTER_PROJECT})
 option(ALIMER_SAMPLES "Build samples" ${ALIMER_MASTER_PROJECT})
+
+option(ALIMER_STD_CONTAINERS "Use standard containers (std::vector, std::unordered_map etc. instead of own containers)" OFF)
+option(ALIMER_PROFILING "Enable performance profiling" ON)
+#option(ALIMER_NETWORK "Enable Networking module " ON)
+#option(ALIMER_IMGUI "Enable ImGui module" ON)
+#option(ALIMER_2D "Enable 2D module" OFF) # WIP
 
 # Tests
 if (ANDROID OR IOS OR EMSCRIPTEN)
@@ -236,11 +242,6 @@ endif ()
 set(CMAKE_SHARED_LINKER_FLAGS_DISTRIBUTION "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 set(CMAKE_EXE_LINKER_FLAGS_DISTRIBUTION "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 
-# Enable testing
-if (ALIMER_TESTS)
-    include (CTest)
-endif ()
-
 # Print current build configuration
 message(STATUS "Engine version: ${ALIMER_VERSION}")
 message(STATUS "GIT Revision ID: ${ALIMER_REVISION_ID}")
@@ -288,6 +289,28 @@ message(STATUS "  C#              ${ALIMER_CSHARP}")
 message(STATUS "  Install         ${ALIMER_INSTALL}")
 message(STATUS "  Samples         ${ALIMER_SAMPLES}")
 message(STATUS "  Tests           ${ALIMER_TESTS}")
+
+# Enable testing
+if (ALIMER_TESTS)
+    include (CTest)
+endif ()
+
+if(ALIMER_SHADER_COMPILER)
+    include(cmake/AlimerShaderCompiler.cmake)
+endif ()
+
+if (ALIMER_EDITOR)
+    #include(cmake/AlimerAssetCompiler.cmake)
+endif ()
+
+# Assets
+add_subdirectory(Assets)
+
+# ThirdParty
+add_subdirectory(ThirdParty)
+
+# Source
+add_subdirectory(Source)
 
 # README and LICENSE
 if(ALIMER_INSTALL)
