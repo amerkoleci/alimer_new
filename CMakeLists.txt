@@ -1,0 +1,340 @@
+# CMake version
+cmake_minimum_required(VERSION 3.24.0 FATAL_ERROR)
+
+if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+	message(FATAL_ERROR "In-source builds are not supported. Please choose a different binary directory.")
+	return()
+endif()
+
+# Only 64 bit is supported
+if (CMAKE_SIZEOF_VOID_P EQUAL 4)
+	message(FATAL_ERROR "32 bit isn't supported")
+    return()
+endif()
+
+# Determine if engine is built as a subproject (using add_subdirectory)
+# or if it is the master project.
+if (NOT DEFINED ALIMER_MASTER_PROJECT)
+    set(ALIMER_MASTER_PROJECT OFF)
+    if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+        set(ALIMER_MASTER_PROJECT ON)
+        message(STATUS "CMake version: ${CMAKE_VERSION}")
+    endif ()
+endif ()
+
+# Use solution folders to organize projects
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# Configure CMake global variables
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_INSTALL_MESSAGE LAZY)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_DEBUG_POSTFIX "")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# Enable IPO with its policy
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+set(CMAKE_POLICY_DEFAULT_CMP0069 NEW)
+
+set(CMAKE_OSX_DEPLOYMENT_TARGET "11" CACHE STRING "Minimum OS X deployment version")
+set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for OS X")
+
+# Build version
+set(ALIMER_VERSION_MAJOR 1)
+set(ALIMER_VERSION_MINOR 0)
+set(ALIMER_VERSION_PATCH 0)
+set(ALIMER_VERSION ${ALIMER_VERSION_MAJOR}.${ALIMER_VERSION_MINOR}.${ALIMER_VERSION_PATCH})
+
+# Project declaration
+project (Alimer
+    VERSION ${ALIMER_VERSION}
+    DESCRIPTION "Cross platform game engine"
+    HOMEPAGE_URL "https://github.com/amerkoleci/alimer_new"
+    LANGUAGES C CXX
+)
+
+
+if (MSVC AND ALIMER_MASTER_PROJECT)
+    if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+        set (CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    endif ()
+endif ()
+
+# Add the cmake directory to the module path.
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+# Include common utilities
+include(GNUInstallDirs)
+include(CMakeDependentOption)
+include(CPM)
+include(FetchPackage)
+
+# Define standard configurations (Debug, Release, Distribution)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
+
+# Set the default CMAKE_BUILD_TYPE to Release.
+# This should be done before the project command since the latter can set
+# CMAKE_BUILD_TYPE itself (it does so for nmake).
+if (ALIMER_MASTER_PROJECT AND NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "The default build type" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS ${CMAKE_CONFIGURATION_TYPES})
+endif ()
+
+set(ALIMER_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(ALIMER_ASSETS_DIR "${ALIMER_ROOT_DIR}/Assets" CACHE PATH "" FORCE)
+set(ALIMER_SHADERS_INCLUDE_DIR "${ALIMER_ROOT_DIR}/Assets/Shaders" CACHE PATH "" FORCE)
+set(ALIMER_SHADERS_DEFINITIONS_DIR "${ALIMER_ROOT_DIR}/Source" CACHE PATH "" FORCE)
+set(ALIMER_SHADERS_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/bin/$<CONFIG>/CompiledShaders")
+
+mark_as_advanced(ALIMER_ROOT_DIR)
+mark_as_advanced(ALIMER_ASSETS_DIR)
+mark_as_advanced(ALIMER_SHADERS_INCLUDE_DIR)
+mark_as_advanced(ALIMER_SHADERS_DEFINITIONS_DIR)
+
+execute_process(COMMAND git rev-list --count HEAD
+    OUTPUT_VARIABLE ALIMER_REVISION_ID
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+if ("${ALIMER_REVISION_ID}" STREQUAL "")
+    # We don't have any source control so just hard-code all of this information to empty
+    set (ALIMER_REVISION_ID 0)
+    set (ALIMER_SHORT_CHANGE_SET 0)
+    set (ALIMER_CHANGE_SET 0)
+    set (ALIMER_CHANGE_SET_DATE "")
+else ()
+    execute_process(COMMAND git rev-parse --short HEAD
+        OUTPUT_VARIABLE ALIMER_SHORT_CHANGE_SET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    execute_process(COMMAND git rev-parse HEAD
+        OUTPUT_VARIABLE ALIMER_CHANGE_SET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    execute_process(COMMAND git log -1 --abbrev=12 --date=format:%Y-%m-%d --pretty=format:%cd
+        OUTPUT_VARIABLE ALIMER_CHANGE_SET_DATE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif ()
+
+# Output directories
+if (ALIMER_MASTER_PROJECT)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib")
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/lib")
+endif ()
+
+# Library type
+if (IOS OR EMSCRIPTEN)
+    set(ALIMER_BUILD_SHARED OFF CACHE BOOL "Always Disable shared library on (IOS, WEB)" FORCE)
+elseif(ANDROID)
+    set(ALIMER_BUILD_SHARED ON CACHE BOOL "Always enable shared library on (ANDROID)" FORCE)
+else ()
+    option(ALIMER_BUILD_SHARED "Build engine as shared library" ON)
+endif ()
+
+# Options
+option(ALIMER_INSTALL "Generate the install target" ${ALIMER_MASTER_PROJECT})
+option(ALIMER_SAMPLES "Build samples" ${ALIMER_MASTER_PROJECT})
+
+# Tests
+if (ANDROID OR IOS OR EMSCRIPTEN)
+    set(ALIMER_TESTS OFF CACHE INTERNAL "Disable tests" FORCE)
+else()
+    option(ALIMER_TESTS "Enable tests" ${ALIMER_MASTER_PROJECT})
+endif()
+
+# Set general compiler flags
+if (MSVC)
+     # Multiprocessor compiler
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+
+    # /permissive- (Standards conformance)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
+
+    # /JMC (Debug just my code)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /JMC-")
+
+    # /Zc:__cplusplus (Enable updated __cplusplus macro)
+    # /Zc:inline (Remove unreferenced COMDAT)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus /Zc:inline")
+
+    # /Zc:twoPhase- (disable two-phase name lookup)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:twoPhase-")
+
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.26)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:preprocessor")
+    endif()
+
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 19.28)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:lambda")
+    endif()
+
+	if (NOT ALIMER_EXCEPTIONS_ENABLED)
+		# Remove any existing compiler flag that enables exceptions
+		string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+
+        # C++ exception handler used, but unwind semantics not enabled
+		# Disable warning about STL and compiler-generated types using noexcept when exceptions are disabled
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4530 /wd4577")
+	else()
+		# Enable exceptions
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+	endif()
+
+    # /Gm (Enable Minimal Rebuild)
+    # /nologo (Suppress Startup Banner) (C/C++)
+    # /diagnostics (Compiler diagnostic options)
+    # /FC (Full path of source code file in diagnostics)
+    # /fp (Specify floating-point behavior)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Gm- /nologo /diagnostics:classic /FC /fp:except-")
+
+    if(CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+      # Enable function-level linking
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Gy /Gw")
+    endif()
+
+    # Use fast floating point model
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast")
+
+    set(CMAKE_CXX_FLAGS_DISTRIBUTION "${CMAKE_CXX_FLAGS_RELEASE}")
+    
+    if (ALIMER_ENABLE_ASAN_UBSAN)
+       set(EXTRA_SANITIZE_OPTIONS "-fsanitize=address -fsanitize=undefined,implicit-conversion,float-divide-by-zero,local-bounds -fno-sanitize-recover=all")
+    endif()
+    if (ALIMER_ENABLE_TSAN)
+       set(EXTRA_SANITIZE_OPTIONS "-fsanitize=thread")
+    endif()
+
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${EXTRA_SANITIZE_OPTIONS}")
+
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /showFilenames")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments") # Clang emits warnings about unused arguments such as /MP and /GL
+
+        #set(CMAKE_SHARED_LINKER_FLAGS_RELEASEASAN "/LIBPATH:${CLANG_LIB_PATH} clang_rt.asan-x86_64.lib -wholearchive:clang_rt.asan-x86_64.lib clang_rt.asan_cxx-x86_64.lib -wholearchive:clang_rt.asan_cxx-x86_64.lib")
+		#set(CMAKE_SHARED_LINKER_FLAGS_RELEASEUBSAN "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LIBPATH:${CLANG_LIB_PATH}")
+		#set(CMAKE_EXE_LINKER_FLAGS_RELEASEASAN "${CMAKE_SHARED_LINKER_FLAGS_RELEASEASAN}")
+		#set(CMAKE_EXE_LINKER_FLAGS_RELEASEUBSAN "${CMAKE_SHARED_LINKER_FLAGS_RELEASEUBSAN}")
+    endif ()
+else()
+    set(CMAKE_CXX_FLAGS_DISTRIBUTION "${CMAKE_CXX_FLAGS_RELEASE}")
+
+    if (ALIMER_ENABLE_ASAN_UBSAN)
+       set(EXTRA_SANITIZE_OPTIONS "-fsanitize=address -fsanitize=undefined,implicit-conversion,float-divide-by-zero,local-bounds -fno-sanitize-recover=all")
+    endif()
+    if (ALIMER_ENABLE_TSAN)
+       set(EXTRA_SANITIZE_OPTIONS "-fsanitize=thread")
+    endif()
+
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${EXTRA_SANITIZE_OPTIONS}")
+endif ()
+
+set(CMAKE_SHARED_LINKER_FLAGS_DISTRIBUTION "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
+set(CMAKE_EXE_LINKER_FLAGS_DISTRIBUTION "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
+
+# Enable testing
+if (ALIMER_TESTS)
+    include (CTest)
+endif ()
+
+# Print current build configuration
+message(STATUS "Engine version: ${ALIMER_VERSION}")
+message(STATUS "GIT Revision ID: ${ALIMER_REVISION_ID}")
+message(STATUS "GIT Short ChangeSet: ${ALIMER_SHORT_CHANGE_SET}")
+message(STATUS "GIT ChangeSet: ${ALIMER_CHANGE_SET}")
+message(STATUS "GIT ChangeSet Date: ${ALIMER_CHANGE_SET_DATE}")
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "C++ Standard: ${CMAKE_CXX_STANDARD}")
+
+message(STATUS "Detected platform: ${ALIMER_PLATFORM_NAME}")
+message(STATUS "Detected architecture: ${ALIMER_ARCH}")
+message(STATUS "Detected host architecture: ${ALIMER_HOST_ARCH}")
+message(STATUS "Detected compiler: ${ALIMER_COMPILER_NAME}")
+    
+if (ALIMER_BUILD_SHARED)
+  message(STATUS "  Library         SHARED")
+else ()
+  message(STATUS "  Library         STATIC")
+endif ()
+
+message(STATUS "  Std Containers  ${ALIMER_STD_CONTAINERS}")
+message(STATUS "  Profiling       ${ALIMER_PROFILING}")
+#message(STATUS "  Network         ${ALIMER_NETWORK}")
+#message(STATUS "  ImGui           ${ALIMER_IMGUI}")
+#message(STATUS "  2D              ${ALIMER_2D}")
+
+message(STATUS "  RHI backends")
+if (ALIMER_RHI_D3D12)
+    message(STATUS "      - Direct3D12:  ALIMER_RHI_D3D12")
+endif ()
+if (ALIMER_RHI_VULKAN)
+    message(STATUS "      - Vulkan:      ALIMER_RHI_VULKAN")
+endif()
+if (ALIMER_RHI_METAL)
+    message(STATUS "      - Metal:       ALIMER_RHI_METAL")
+endif()
+if (ALIMER_RHI_WEBGPU)
+    message(STATUS "      - WebGPU:      ALIMER_RHI_WEBGPU")
+endif()
+
+message(STATUS "  ShaderCompiler  ${ALIMER_SHADER_COMPILER}")
+message(STATUS "  Editor          ${ALIMER_EDITOR}")
+message(STATUS "  C#              ${ALIMER_CSHARP}")
+
+message(STATUS "  Install         ${ALIMER_INSTALL}")
+message(STATUS "  Samples         ${ALIMER_SAMPLES}")
+message(STATUS "  Tests           ${ALIMER_TESTS}")
+
+# README and LICENSE
+if(ALIMER_INSTALL)
+    message(STATUS "Generating install")
+    install (FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/README.md
+        ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE
+        DESTINATION .
+    )
+
+    # Install data files
+    file (MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+    if (NOT ANDROID)
+        foreach(dir Assets)
+            #foreach (CONFIG ${CMAKE_CONFIGURATION_TYPES})
+            #    create_symlink(${CMAKE_CURRENT_SOURCE_DIR}/${dir} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CONFIG}/${dir})
+            #endforeach()
+
+            # Install
+            #install (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${dir} DESTINATION ${CMAKE_INSTALL_BINDIR})
+        endforeach()
+    endif ()
+
+    # DXC
+    if (ALIMER_SHADER_COMPILER AND TARGET ShaderMake)
+        if (WIN32)
+            set(DXIL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/Source/ThirdParty/dxc/bin/win-x64/dxil.dll")
+	        set(DXCOMPILER_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/Source/ThirdParty/dxc/bin/win-x64/dxcompiler.dll")
+        elseif(UNIX)
+            set(DXIL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/Source/ThirdParty/dxc/bin/linux-x64/libdxil.so")
+	        set(DXCOMPILER_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/Source/ThirdParty/dxc/linux/win-x64/libdxcompiler.so")
+        endif()
+
+	    install(FILES ${DXIL_LIBRARY} ${DXCOMPILER_LIBRARY} DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+        install(
+            TARGETS ShaderMake
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+
+        install(DIRECTORY ${ALIMER_SHADERS_OUTPUT_DIR} DESTINATION ${CMAKE_INSTALL_BINDIR})
+    endif ()
+endif ()
+
+if (ALIMER_EDITOR AND ALIMER_CSHARP)
+   # set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT Alimer.Editor)
+endif ()
+
