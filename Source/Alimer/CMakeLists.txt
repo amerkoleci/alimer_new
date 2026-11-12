@@ -224,6 +224,20 @@ else()
     endif ()
 endif ()
 
+# Public dependencies
+target_link_libraries(${TARGET_NAME} PUBLIC
+    fmt::fmt
+    spdlog
+)
+
+# Private dependencies
+target_link_libraries(${TARGET_NAME} PRIVATE
+    stb
+    lz4
+    rapidjson
+    ShaderMakeBlob
+)
+
 if (NOT ALIMER_STD_CONTAINERS)
     target_link_libraries(${TARGET_NAME} PUBLIC unordered_dense)
 endif()
