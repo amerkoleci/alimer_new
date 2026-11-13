@@ -235,6 +235,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     stb
     lz4
     rapidjson
+    miniaudio
     ShaderMakeBlob
 )
 

@@ -54,12 +54,12 @@ project (Alimer
     LANGUAGES C CXX
 )
 
-
-if (MSVC AND ALIMER_MASTER_PROJECT)
-    if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
-        set (CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-    endif ()
-endif ()
+# Disabled for now, causes Assertion failed: __acrt_first_block == header, when using std::string
+#if (MSVC AND ALIMER_MASTER_PROJECT)
+#    if (NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY)
+#        set (CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+#    endif ()
+#endif ()
 
 # Add the cmake directory to the module path.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -69,6 +69,7 @@ include(GNUInstallDirs)
 include(CMakeDependentOption)
 include(FetchPackage)
 include(AlimerUtils)
+include(Alimer)
 
 # Define standard configurations (Debug, Release, Distribution)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")

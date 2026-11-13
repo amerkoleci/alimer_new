@@ -71,3 +71,20 @@ if (NOT (EMSCRIPTEN OR ANDROID OR WINDOWS_STORE))
         set_property(TARGET "SDL_uclibc" PROPERTY FOLDER "ThirdParty")
     endif ()
 endif()
+
+# miniaudio
+add_library(miniaudio INTERFACE)
+target_include_directories(miniaudio INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/miniaudio")
+target_sources(miniaudio INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/miniaudio/miniaudio.h)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/miniaudio
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/ThirdParty
+)
+
+if (ALIMER_TESTS)
+    add_library(doctest INTERFACE)
+    set(DOCTEST_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/doctest)
+    target_sources(doctest INTERFACE 
+        ${DOCTEST_INCLUDE_DIR}/doctest.h
+    )
+    target_include_directories(doctest SYSTEM INTERFACE ${DOCTEST_INCLUDE_DIR})
+endif ()
