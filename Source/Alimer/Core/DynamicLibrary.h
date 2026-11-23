@@ -4,60 +4,44 @@
 #pragma once
 
 #include "Alimer/Core/Platform.h"
+#include <bit>
 
 namespace Alimer
 {
+    /* Dynamic Library */
+    using LibraryHandle = void*; // HMODULE on Win32
 
     class ALIMER_API DynamicLibrary final
     {
     public:
-        DynamicLibrary() noexcept = default;
-        explicit DynamicLibrary(StringView path) noexcept
-        {
-            _handle = OpenLibrary(path.data());
-        }
-
-        DynamicLibrary(DynamicLibrary&& other) noexcept
-            : _handle(other._handle)
-        {
-            other._handle = nullptr;
-        }
-
-        DynamicLibrary& operator=(DynamicLibrary&& other) noexcept
-        {
-            if (this != &other)
-            {
-                Unload();
-                _handle = other._handle;
-                other._handle = nullptr;
-            }
-            return *this;
-        }
+        DynamicLibrary() = default;
+        ~DynamicLibrary();
 
         DynamicLibrary(const DynamicLibrary&) = delete;
         DynamicLibrary& operator=(const DynamicLibrary&) = delete;
 
-        ~DynamicLibrary();
+        DynamicLibrary(DynamicLibrary&& other) noexcept;
+        DynamicLibrary& operator=(DynamicLibrary&& other) noexcept;
 
-        bool Load(StringView path) noexcept;
-        void Unload() noexcept;
+        bool Open(StringView path, String* error = nullptr) noexcept;
+        void Close() noexcept;
+        void* GetExport(StringView name, String* error = nullptr) const noexcept;
 
-        [[nodiscard]] bool IsLoaded() const noexcept { return _handle != nullptr; }
+        bool IsValid() const noexcept { return _handle != nullptr; }
 
         // Resolves a symbol as the requested pointer type (typically a function
         // // pointer). Returns nullptr if absent or not loaded.
         template <typename T>
-        [[nodiscard]] T GetSymbol(StringView name) const noexcept
+        [[nodiscard]] T GetExport(StringView name, String* error = nullptr) const noexcept
         {
             static_assert(sizeof(T) == sizeof(void*), "GetSymbol<T> expects a pointer type.");
-            void* symbol = (_handle != nullptr) ? GetLibrarySymbol(_handle, name) : nullptr;
+            void* symbol = GetExport(name, error);
 
-            T result{};
-            std::memcpy(&result, &symbol, sizeof(result));
-            return result;
+            return std::bit_cast<T>(symbol);
         }
 
     private:
-        LibraryHandle _handle = nullptr;
+        LibraryHandle _handle{ nullptr };
+        bool _needsClose{ false };
     };
 }

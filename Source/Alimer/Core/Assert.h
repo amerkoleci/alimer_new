@@ -31,7 +31,7 @@ namespace Alimer::Assert
 		{ \
 			if (!(cond)) \
 			{ \
-				if (Alimer::Assert::ReportFailure(#cond, nullptr, __FILE__, __LINE__, __func__)) \
+				if (Alimer::Assert::ReportFailure(#cond, nullptr, __FILE__, __LINE__, ALIMER_FUNCTION_NAME)) \
 					ALIMER_BREAKPOINT; \
 			} \
 		} while(0)
@@ -41,7 +41,7 @@ namespace Alimer::Assert
 		{ \
 			if (!(cond)) \
 			{ \
-				if (Alimer::Assert::ReportFailure(#cond, msg, __FILE__, __LINE__, __func__)) \
+				if (Alimer::Assert::ReportFailure(#cond, msg, __FILE__, __LINE__, ALIMER_FUNCTION_NAME)) \
 					ALIMER_BREAKPOINT; \
 			} \
 		} while(0)
