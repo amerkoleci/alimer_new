@@ -19,7 +19,7 @@
 #pragma comment(lib, "Mswsock.lib")
 #pragma comment(lib, "AdvApi32.lib")
 
-namespace spdlog {
+SPDLOG_NAMESPACE_BEGIN
 namespace details {
 class tcp_client {
     SOCKET socket_ = INVALID_SOCKET;
@@ -28,7 +28,7 @@ class tcp_client {
         WSADATA wsaData;
         auto rv = WSAStartup(MAKEWORD(2, 2), &wsaData);
         if (rv != 0) {
-            throw_winsock_error_("WSAStartup failed", ::WSAGetLastError());
+            throw_winsock_error_("WSAStartup failed", rv);
         }
     }
 
@@ -52,8 +52,10 @@ public:
     bool is_connected() const { return socket_ != INVALID_SOCKET; }
 
     void close() {
-        ::closesocket(socket_);
-        socket_ = INVALID_SOCKET;
+        if (socket_ != INVALID_SOCKET) {
+            ::closesocket(socket_);
+            socket_ = INVALID_SOCKET;
+        }
     }
 
     SOCKET fd() const { return socket_; }
@@ -95,12 +97,13 @@ public:
             return SOCKET_ERROR;
         }
 
-        // Wait until socket is writable or timeout expires
+        // Wait until the connection succeeds, fails, or times out.
         fd_set wfds;
         FD_ZERO(&wfds);
         FD_SET(sockfd, &wfds);
+        fd_set efds = wfds;
 
-        rv = ::select(0, nullptr, &wfds, nullptr, const_cast<timeval *>(&tv));
+        rv = ::select(0, nullptr, &wfds, &efds, const_cast<timeval *>(&tv));
 
         // Restore blocking mode regardless of select result
         mode = 0UL;
@@ -153,8 +156,7 @@ public:
         auto rv = ::getaddrinfo(host.c_str(), port_str.c_str(), &hints, &addrinfo_result);
         int last_error = 0;
         if (rv != 0) {
-            last_error = ::WSAGetLastError();
-            WSACleanup();
+            last_error = rv;
             throw_winsock_error_("getaddrinfo failed", last_error);
         }
 
@@ -163,7 +165,6 @@ public:
             socket_ = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
             if (socket_ == INVALID_SOCKET) {
                 last_error = ::WSAGetLastError();
-                WSACleanup();
                 continue;
             }
             if (connect_socket_with_timeout(socket_, rp->ai_addr, (int)rp->ai_addrlen, tv) == 0) {
@@ -176,7 +177,6 @@ public:
         }
         ::freeaddrinfo(addrinfo_result);
         if (socket_ == INVALID_SOCKET) {
-            WSACleanup();
             throw_winsock_error_("connect failed", last_error);
         }
         if (timeout_ms > 0) {
@@ -214,4 +214,4 @@ public:
     }
 };
 }  // namespace details
-}  // namespace spdlog
+SPDLOG_NAMESPACE_END
