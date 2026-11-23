@@ -54,7 +54,7 @@ bool DynamicLibrary::Open(StringView path, String* error) noexcept
     }
     _handle = reinterpret_cast<LibraryHandle>(handle);
 #elif defined(__linux__) || defined(__APPLE__)
-    _handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+    _handle = dlopen(path.data(), RTLD_NOW | RTLD_LOCAL);
     if (_handle == nullptr && error != nullptr)
     {
         *error = dlerror();
