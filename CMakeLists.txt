@@ -147,6 +147,42 @@ option(ALIMER_PROFILING "Enable performance profiling" ON)
 #option(ALIMER_IMGUI "Enable ImGui module" ON)
 #option(ALIMER_2D "Enable 2D module" OFF) # WIP
 
+
+# Determine available RHI backends
+if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
+    set(ALIMER_RHI_HAS_D3D12 OFF)
+    set(ALIMER_RHI_HAS_VULKAN OFF)
+    set(ALIMER_RHI_HAS_METAL OFF)
+    set(ALIMER_RHI_HAS_WEBGPU ON)
+elseif (WIN32)
+    set(ALIMER_RHI_HAS_D3D12 ON)
+    set(ALIMER_RHI_HAS_VULKAN ON)
+    set(ALIMER_RHI_HAS_METAL OFF)
+    set(ALIMER_RHI_HAS_WEBGPU ON)
+elseif(APPLE)
+    set(ALIMER_RHI_HAS_D3D12 OFF)
+    set(ALIMER_RHI_HAS_VULKAN ON)
+    set(ALIMER_RHI_HAS_METAL OFF) # Disable for now
+    set(ALIMER_RHI_HAS_WEBGPU OFF)
+elseif(UNIX OR ANDROID)
+    set(ALIMER_RHI_HAS_D3D12 OFF)
+    set(ALIMER_RHI_HAS_VULKAN ON)
+    set(ALIMER_RHI_HAS_METAL OFF)
+    set(ALIMER_RHI_HAS_WEBGPU OFF)
+endif()
+
+# RHI backends
+cmake_dependent_option(ALIMER_RHI_VULKAN "Enable Vulkan backend" ON "ALIMER_RHI_HAS_VULKAN" OFF)
+cmake_dependent_option(ALIMER_RHI_D3D12 "Enable D3D12 backend" ON "ALIMER_RHI_HAS_D3D12" OFF)
+cmake_dependent_option(ALIMER_RHI_METAL "Enable Metal backend" ON "ALIMER_RHI_HAS_METAL" OFF)
+
+# ShaderCompiler
+if (WIN32)
+    option(ALIMER_SHADER_COMPILER "Build the shader compiler executable" ${ALIMER_MASTER_PROJECT})
+else()
+    set(ALIMER_SHADER_COMPILER OFF CACHE INTERNAL "Disable shader compiler" FORCE)
+endif ()
+
 # Tests
 if (ANDROID OR IOS OR EMSCRIPTEN)
     set(ALIMER_TESTS OFF CACHE INTERNAL "Disable tests" FORCE)
@@ -208,15 +244,6 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fp:fast")
 
     set(CMAKE_CXX_FLAGS_DISTRIBUTION "${CMAKE_CXX_FLAGS_RELEASE}")
-    
-    if (ALIMER_ENABLE_ASAN_UBSAN)
-       set(EXTRA_SANITIZE_OPTIONS "-fsanitize=address -fsanitize=undefined,implicit-conversion,float-divide-by-zero,local-bounds -fno-sanitize-recover=all")
-    endif()
-    if (ALIMER_ENABLE_TSAN)
-       set(EXTRA_SANITIZE_OPTIONS "-fsanitize=thread")
-    endif()
-
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${EXTRA_SANITIZE_OPTIONS}")
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /showFilenames")
@@ -229,15 +256,6 @@ if (MSVC)
     endif ()
 else()
     set(CMAKE_CXX_FLAGS_DISTRIBUTION "${CMAKE_CXX_FLAGS_RELEASE}")
-
-    if (ALIMER_ENABLE_ASAN_UBSAN)
-       set(EXTRA_SANITIZE_OPTIONS "-fsanitize=address -fsanitize=undefined,implicit-conversion,float-divide-by-zero,local-bounds -fno-sanitize-recover=all")
-    endif()
-    if (ALIMER_ENABLE_TSAN)
-       set(EXTRA_SANITIZE_OPTIONS "-fsanitize=thread")
-    endif()
-
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${EXTRA_SANITIZE_OPTIONS}")
 endif ()
 
 set(CMAKE_SHARED_LINKER_FLAGS_DISTRIBUTION "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
@@ -271,7 +289,7 @@ message(STATUS "  Profiling       ${ALIMER_PROFILING}")
 
 message(STATUS "  RHI backends")
 if (ALIMER_RHI_D3D12)
-    message(STATUS "      - Direct3D12:  ALIMER_RHI_D3D12")
+    message(STATUS "      - D3D12:       ALIMER_RHI_D3D12")
 endif ()
 if (ALIMER_RHI_VULKAN)
     message(STATUS "      - Vulkan:      ALIMER_RHI_VULKAN")
@@ -338,11 +356,11 @@ if(ALIMER_INSTALL)
     # DXC
     if (ALIMER_SHADER_COMPILER AND TARGET ShaderMake)
         if (WIN32)
-            set(DXIL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/Source/ThirdParty/dxc/bin/win-x64/dxil.dll")
-	        set(DXCOMPILER_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/Source/ThirdParty/dxc/bin/win-x64/dxcompiler.dll")
+            set(DXIL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/DXC/bin/win-x64/dxil.dll")
+	        set(DXCOMPILER_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/DXC/bin/win-x64/dxcompiler.dll")
         elseif(UNIX)
-            set(DXIL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/Source/ThirdParty/dxc/bin/linux-x64/libdxil.so")
-	        set(DXCOMPILER_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/Source/ThirdParty/dxc/linux/win-x64/libdxcompiler.so")
+            set(DXIL_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/DXC/bin/linux-x64/libdxil.so")
+	        set(DXCOMPILER_LIBRARY "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/DXC/bin/linux-x64/libdxcompiler.so")
         endif()
 
 	    install(FILES ${DXIL_LIBRARY} ${DXCOMPILER_LIBRARY} DESTINATION ${CMAKE_INSTALL_BINDIR})
@@ -354,7 +372,13 @@ if(ALIMER_INSTALL)
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         )
 
-        install(DIRECTORY ${ALIMER_SHADERS_OUTPUT_DIR} DESTINATION ${CMAKE_INSTALL_BINDIR})
+        foreach (CONFIG ${CMAKE_CONFIGURATION_TYPES})
+            set(ALIMER_INSTALL_SHADERS_OUTPUT_DIR "${CMAKE_SOURCE_DIR}/bin/${CONFIG}/CompiledShaders")
+
+             if(IS_DIRECTORY "${ALIMER_INSTALL_SHADERS_OUTPUT_DIR}")
+                install(DIRECTORY ${ALIMER_INSTALL_SHADERS_OUTPUT_DIR} DESTINATION ${CMAKE_INSTALL_BINDIR})
+            endif()
+        endforeach()
     endif ()
 endif ()
 
