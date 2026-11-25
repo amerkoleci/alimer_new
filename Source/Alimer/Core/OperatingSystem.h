@@ -41,14 +41,11 @@ namespace Alimer
         Console
     };
 
-
-    ALIMER_API PlatformID GetPlatformID();
-    ALIMER_API PlatformFamily GetPlatformFamily();
-    ALIMER_API uint32_t GetNumPhysicalCPUs();
-
-    /* Dynamic Library */
-    using LibraryHandle = void*; // HMODULE on Win32
-    ALIMER_API LibraryHandle OpenLibrary(const char* path) noexcept;
-    ALIMER_API void CloseLibrary(LibraryHandle handle) noexcept;
-    ALIMER_API void* GetLibrarySymbol(LibraryHandle handle, const char* name) noexcept;
+    class ALIMER_API OperatingSystem
+    {
+    public:
+        [[nodiscard]] static PlatformID GetPlatformID();
+        [[nodiscard]] static PlatformFamily GetPlatformFamily();
+        [[nodiscard]] static uint32_t GetNumPhysicalCPUs();
+    };
 }

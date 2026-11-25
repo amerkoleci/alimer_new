@@ -254,6 +254,18 @@ if (NOT (EMSCRIPTEN OR ANDROID OR WINDOWS_STORE))
     target_compile_definitions(${TARGET_NAME} PRIVATE ALIMER_USE_SDL)
 endif ()
 
+if (ALIMER_RHI_VULKAN)
+    target_link_libraries(${TARGET_NAME} PRIVATE vma)
+endif (ALIMER_RHI_VULKAN)
+
+if (ALIMER_RHI_D3D12)
+    target_link_libraries(${TARGET_NAME} PRIVATE d3d12ma)
+endif ()
+
+if(ALIMER_RHI_METAL)
+    target_link_libraries(${TARGET_NAME} PRIVATE alimer-rhi-metal-cpp)
+endif ()
+
 # Install root header files and config file
 if(ALIMER_INSTALL)
     install (FILES 

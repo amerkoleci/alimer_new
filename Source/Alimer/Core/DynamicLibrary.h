@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Alimer/Core/Platform.h"
+#include "Alimer/Core/Base.h"
 #include <bit>
 
 namespace Alimer
