@@ -46,20 +46,33 @@ SDLPlatform::SDLPlatform()
     SDL_SetLogPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_DEBUG);
 #endif
     SDL_SetLogOutputFunction(AlimerLog_SDL, nullptr);
+}
+
+SDLPlatform::~SDLPlatform()
+{
+    if (!_initialized)
+        return;
+
+    SDL_RemoveEventWatch(&SDLPlatform::OnWatchedEvent, this);
+    SDL_Quit();
+    _initialized = false;
+}
+
+bool SDLPlatform::Initialize(const String& name)
+{
+    if (!name.empty())
+    {
+        SDL_SetHint(SDL_HINT_APP_NAME, name.c_str());
+    }
 
     // Init SDL
     const Uint32 initFlags = SDL_INIT_VIDEO | SDL_INIT_GAMEPAD;
     if (!SDL_Init(initFlags))
     {
         LOGE("Alimer: SDL_Init Failed: {}", SDL_GetError());
-        return;
+        return false;
     }
     SDL_AddEventWatch(&SDLPlatform::OnWatchedEvent, this);
-
-    //if (!_options.name.empty())
-    //{
-    //    SDL_SetHint(SDL_HINT_APP_NAME, _options.name.c_str());
-    //}
 
     const int version = SDL_GetVersion();
     [[ maybe_unused ]] const char* revision = SDL_GetRevision();
@@ -68,12 +81,9 @@ SDLPlatform::SDLPlatform()
         SDL_VERSIONNUM_MINOR(version),
         SDL_VERSIONNUM_MICRO(version)
     );
-}
 
-SDLPlatform::~SDLPlatform()
-{
-    SDL_RemoveEventWatch(&SDLPlatform::OnWatchedEvent, this);
-    SDL_Quit();
+    _initialized = true;
+    return true;
 }
 
 bool SDLPlatform::OnWatchedEvent(void* userdata, SDL_Event* event)

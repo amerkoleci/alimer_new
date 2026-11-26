@@ -14,7 +14,11 @@ namespace Alimer
         SDLPlatform();
         ~SDLPlatform() override;
 
+        bool Initialize(const String& name) override;
+
     private:
         static bool OnWatchedEvent(void* userdata, SDL_Event* event);
+
+        bool _initialized{ false };
     };
 }

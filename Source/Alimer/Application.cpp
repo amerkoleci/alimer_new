@@ -30,13 +30,6 @@ Application::Application(Platform* platform)
     //JobSystem::Initialize();
     mainThreadId = std::this_thread::get_id();
 
-    // Init platform first
-   /* if (!PlatformInit())
-    {
-        LOGF("Failed to initialize platform");
-        return;
-    }*/
-
     s_Instance = this;
 }
 
@@ -50,7 +43,15 @@ Application::~Application()
 
 void Application::Run()
 {
+    // Allow config override.
+    Setup();
 
+    // Init platform first
+    if (!_platform->Initialize(_options.name))
+    {
+        LOGF("Failed to initialize platform");
+        return;
+    }
 }
 
 Application& Alimer::GetApplication()

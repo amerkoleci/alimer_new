@@ -13,13 +13,12 @@ namespace Alimer
         /// Destructor.
         virtual ~Platform() = default;
 
-        Platform(const Platform&) = delete;
-        Platform& operator=(const Platform&) = delete;
-        Platform(Platform&&) = delete;
-        Platform& operator=(Platform&&) = delete;
+        ALIMER_DISABLE_COPY_MOVE(Platform);
 
         /// Create default platform for the current OS.
         [[nodiscard]] static Platform* CreateDefault();
+
+        virtual bool Initialize(const String& name) = 0;
 
     protected:
         Platform() = default;

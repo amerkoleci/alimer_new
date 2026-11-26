@@ -10,7 +10,7 @@ class RHISamplesApp final : public Application
 public:
     ~RHISamplesApp() override;
 
-    //void Setup() override;
+    void Setup() override;
     //void Initialize() override;
     //void Draw([[maybe_unused]] RHICommandBuffer* commandBuffer, [[maybe_unused]] RHITexture* outputTexture) override;
     //void OnWindowResized(Window* window) override;
@@ -20,6 +20,15 @@ private:
 
 RHISamplesApp::~RHISamplesApp()
 {
+}
+
+void RHISamplesApp::Setup()
+{
+    _options.name = "RHI Samples";
+    //_options.graphics.preferredBackend = RHIBackend::Vulkan;
+#if defined(_DEBUG)
+    //_options.graphics.validationMode = RHIValidationMode::Enabled;
+#endif
 }
 
 ALIMER_DEFINE_APPLICATION(RHISamplesApp);

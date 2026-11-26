@@ -3,6 +3,7 @@
 
 #include "Alimer/Core/Assert.h"
 #include "Alimer/Core/PixelFormat.h"
+#include "Alimer/Math/Math.h"
 
 #if defined(_WIN32)
 #   if defined(ALIMER_RHI_D3D12)
@@ -936,8 +937,8 @@ namespace Alimer
             case PixelFormat::BC6HRGBFloat:
             case PixelFormat::BC7RGBAUnorm:
             case PixelFormat::BC7RGBAUnormSrgb:
-                widthCount = Max(1u, (width + 3) / 4);
-                heightCount = Max(1u, (height + 3) / 4);
+                widthCount = Math::Max(1u, (width + 3) / 4);
+                heightCount = Math::Max(1u, (height + 3) / 4);
                 rowPitch = widthCount * formatInfo.bytesPerBlock; // BytesPerBlock is 8 or 16
                 slicePitch = rowPitch * heightCount;
                 break;
@@ -953,8 +954,8 @@ namespace Alimer
             case PixelFormat::EACR11Snorm:
             case PixelFormat::EACRG11Unorm:
             case PixelFormat::EACRG11Snorm:
-                widthCount = Max(1u, (width + formatInfo.blockWidth - 1) / formatInfo.blockWidth);
-                heightCount = Max(1u, (height + formatInfo.blockHeight - 1) / formatInfo.blockHeight);
+                widthCount = Math::Max(1u, (width + formatInfo.blockWidth - 1) / formatInfo.blockWidth);
+                heightCount = Math::Max(1u, (height + formatInfo.blockHeight - 1) / formatInfo.blockHeight);
                 rowPitch = widthCount * formatInfo.bytesPerBlock; // BytesPerBlock is 8 or 16
                 slicePitch = rowPitch * heightCount;
                 break;
@@ -987,8 +988,8 @@ namespace Alimer
             case PixelFormat::ASTC12x10Unorm:
             case PixelFormat::ASTC12x10UnormSrgb:
             case PixelFormat::ASTC12x12Unorm:
-                widthCount = Max(1u, (width + formatInfo.blockWidth - 1) / formatInfo.blockWidth);
-                heightCount = Max(1u, (height + formatInfo.blockHeight - 1) / formatInfo.blockHeight);
+                widthCount = Math::Max(1u, (width + formatInfo.blockWidth - 1) / formatInfo.blockWidth);
+                heightCount = Math::Max(1u, (height + formatInfo.blockHeight - 1) / formatInfo.blockHeight);
                 rowPitch = widthCount * formatInfo.bytesPerBlock;  // BytesPerBlock is always 16
                 slicePitch = rowPitch * heightCount;
                 break;
@@ -1008,8 +1009,8 @@ namespace Alimer
             case PixelFormat::ASTC10x10HDR:
             case PixelFormat::ASTC12x10HDR:
             case PixelFormat::ASTC12x12HDR:
-                widthCount = Max(1u, (width + formatInfo.blockWidth - 1) / formatInfo.blockWidth);
-                heightCount = Max(1u, (height + formatInfo.blockHeight - 1) / formatInfo.blockHeight);
+                widthCount = Math::Max(1u, (width + formatInfo.blockWidth - 1) / formatInfo.blockWidth);
+                heightCount = Math::Max(1u, (height + formatInfo.blockHeight - 1) / formatInfo.blockHeight);
                 rowPitch = widthCount * formatInfo.bytesPerBlock;  // BytesPerBlock is always 16
                 slicePitch = rowPitch * heightCount;
                 break;

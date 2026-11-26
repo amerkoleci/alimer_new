@@ -2,6 +2,10 @@
 // Licensed under the MIT License (MIT). See LICENSE in the repository root for more information.
 
 #include "Alimer/Platform/Win32/WindowsPlatform.h"
+#ifndef NTSTATUS
+typedef LONG NTSTATUS;
+#endif
+typedef NTSTATUS(WINAPI* RtlGetVersionPtr)(PRTL_OSVERSIONINFOW);
 
 namespace Alimer
 {

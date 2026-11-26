@@ -9,6 +9,12 @@ namespace Alimer
 {
     class Platform;
 
+    struct ApplicationOptions final
+    {
+        /// Application name.
+        String name = "Alimer";
+    };
+
     /// Class that provides graphics initialization, application logic, and rendering code.
     class ALIMER_API Application : public RefCounted
     {
@@ -28,7 +34,12 @@ namespace Alimer
         /// Constructor.
         Application(Platform* platform = nullptr);
 
+        /// Setup is called before platform initialization. Override this function to setup your application.
+        virtual void Setup() {}
+
+    protected:
         Platform* _platform{ nullptr };
+        ApplicationOptions _options{};
 
     private:
         static Application* s_Instance;
