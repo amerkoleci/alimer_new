@@ -144,7 +144,7 @@ bool OperatingSystem::IsWindows()
 #endif
 }
 
-bool OperatingSystem::IsWindowsVersionAtLeast(int32 major, int32 minor, int32 build, int32 revision)
+bool OperatingSystem::IsWindowsVersionAtLeast(int32_t major, int32_t minor, int32_t build, int32_t revision)
 {
     return IsWindows() && IsOSVersionAtLeast(major, minor, build, revision);
 }
@@ -176,7 +176,7 @@ bool OperatingSystem::IsAndroid()
 #endif
 }
 
-bool OperatingSystem::IsAndroidVersionAtLeast(int32 major, int32 minor, int32 build, int32 revision)
+bool OperatingSystem::IsAndroidVersionAtLeast(int32_t major, int32_t minor, int32_t build, int32_t revision)
 {
     return IsAndroid() && IsOSVersionAtLeast(major, minor, build, revision);
 }
@@ -193,7 +193,7 @@ bool OperatingSystem::IsIOS()
     return false;
 }
 
-bool OperatingSystem::IsIOSVersionAtLeast(int32 major, int32 minor, int32 build, int32 revision)
+bool OperatingSystem::IsIOSVersionAtLeast(int32_t major, int32_t minor, int32_t build, int32_t revision)
 {
     return IsIOS() && IsOSVersionAtLeast(major, minor, build, revision);
 }
@@ -210,7 +210,7 @@ bool OperatingSystem::IsMacOS()
     return false;
 }
 
-bool OperatingSystem::IsMacOSVersionAtLeast(int32 major, int32 minor, int32 build)
+bool OperatingSystem::IsMacOSVersionAtLeast(int32_t major, int32_t minor, int32_t build)
 {
     return IsMacOS() && IsOSVersionAtLeast(major, minor, build, 0);
 }
@@ -227,12 +227,12 @@ bool OperatingSystem::IsMacCatalyst()
     return false;
 }
 
-bool OperatingSystem::IsMacCatalystVersionAtLeast(int32 major, int32 minor , int32 build)
+bool OperatingSystem::IsMacCatalystVersionAtLeast(int32_t major, int32_t minor , int32_t build)
 {
     return IsMacCatalyst() && IsOSVersionAtLeast(major, minor, build, 0);
 }
 
-bool OperatingSystem::IsOSVersionAtLeast(int32 major, int32 minor, int32 build, int32 revision)
+bool OperatingSystem::IsOSVersionAtLeast(int32_t major, int32_t minor, int32_t build, int32_t revision)
 {
     Version current = GetOSVersion();
 
@@ -246,7 +246,7 @@ bool OperatingSystem::IsOSVersionAtLeast(int32 major, int32 minor, int32 build, 
     }
 
     // Unspecified build component is to be treated as zero
-    int32 currentBuild = current.build < 0 ? 0 : current.build;
+    int32_t currentBuild = current.build < 0 ? 0 : current.build;
     build = build < 0 ? 0 : build;
     if (currentBuild != build)
     {
@@ -254,7 +254,7 @@ bool OperatingSystem::IsOSVersionAtLeast(int32 major, int32 minor, int32 build, 
     }
 
     // Unspecified revision component is to be treated as zero
-    int32 currentRevision = current.revision < 0 ? 0 : current.revision;
+    int32_t currentRevision = current.revision < 0 ? 0 : current.revision;
     revision = revision < 0 ? 0 : revision;
 
     return currentRevision >= revision;

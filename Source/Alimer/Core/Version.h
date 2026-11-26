@@ -10,14 +10,14 @@ namespace Alimer
     struct ALIMER_API Version final
     {
     public:
-        int32 major = 0;
-        int32 minor = 0;
-        int32 build = -1;
-        int32 revision = -1;
+        int32_t major = 0;
+        int32_t minor = 0;
+        int32_t build = -1;
+        int32_t revision = -1;
 
         Version() noexcept = default;
 
-        Version(int32 major_, int32 minor_) noexcept
+        Version(int32_t major_, int32_t minor_) noexcept
             : major(Math::Max(major_, 0))
             , minor(Math::Max(minor_, 0))
             , build(-1)
@@ -26,7 +26,7 @@ namespace Alimer
 
         }
 
-        Version(int32 major_, int32 minor_, int32 build_) noexcept
+        Version(int32_t major_, int32_t minor_, int32_t build_) noexcept
             : major(Math::Max(major_, 0))
             , minor(Math::Max(minor_, 0))
             , build(Math::Max(build_, 0))
@@ -35,7 +35,7 @@ namespace Alimer
 
         }
 
-        Version(int32 major_, int32 minor_, int32 build_, int32 revision_) noexcept
+        Version(int32_t major_, int32_t minor_, int32_t build_, int32_t revision_) noexcept
             : major(Math::Max(major_, 0))
             , minor(Math::Max(minor_, 0))
             , build(Math::Max(build_, 0))
@@ -52,7 +52,7 @@ namespace Alimer
         bool operator<=(const Version& other) const { return CompareTo(other) <= 0; }
 
         /// Compare to another version.
-        [[nodiscard]] int32 CompareTo(const Version& value) const;
+        [[nodiscard]] int32_t CompareTo(const Version& value) const;
 
         /// Return hash value of the vector.
         [[nodiscard]] size_t GetHashCode() const;

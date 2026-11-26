@@ -12,75 +12,75 @@
 
 using namespace Alimer;
 
-uint32 BitOperations::RoundUpToPowerOf2(uint32 value) noexcept
+uint32_t BitOperations::RoundUpToPowerOf2(uint32_t value) noexcept
 {
     return std::bit_ceil(value);
 }
 
-uint64 BitOperations::RoundUpToPowerOf2(uint64 value) noexcept
+uint64_t BitOperations::RoundUpToPowerOf2(uint64_t value) noexcept
 {
     return std::bit_ceil(value);
 }
 
-uint32 BitOperations::BitScanForward(uint32 value)
+uint32_t BitOperations::BitScanForward(uint32_t value)
 {
     ALIMER_ASSERT(value != 0);
 
-    return static_cast<uint32>(std::countr_zero(value));
+    return static_cast<uint32_t>(std::countr_zero(value));
 }
 
-uint32 BitOperations::BitScanForward(uint64 value)
+uint32_t BitOperations::BitScanForward(uint64_t value)
 {
     ALIMER_ASSERT(value != 0);
 
-    return static_cast<uint32>(std::countr_zero(value));
+    return static_cast<uint32_t>(std::countr_zero(value));
 }
 
-uint32 BitOperations::BitScanReverse(uint32 value)
+uint32_t BitOperations::BitScanReverse(uint32_t value)
 {
     ALIMER_ASSERT(value != 0);
 
-    return static_cast<uint32>(std::bit_width(value) - 1);
+    return static_cast<uint32_t>(std::bit_width(value) - 1);
 }
 
-uint32 BitOperations::BitScanReverse(uint64 value)
+uint32_t BitOperations::BitScanReverse(uint64_t value)
 {
     ALIMER_ASSERT(value != 0);
 
-    return static_cast<uint32>(std::bit_width(value) - 1);
+    return static_cast<uint32_t>(std::bit_width(value) - 1);
 }
 
-uint32 BitOperations::LeadingZeroCount(uint32 value)
+uint32_t BitOperations::LeadingZeroCount(uint32_t value)
 {
-    return static_cast<uint32>(std::countl_zero(value));
+    return static_cast<uint32_t>(std::countl_zero(value));
 }
 
-uint32 BitOperations::LeadingZeroCount(uint64 value)
+uint32_t BitOperations::LeadingZeroCount(uint64_t value)
 {
-    return static_cast<uint32>(std::countl_zero(value));
+    return static_cast<uint32_t>(std::countl_zero(value));
 }
 
-uint32 BitOperations::Log2(uint32 value)
+uint32_t BitOperations::Log2(uint32_t value)
 {
-    return static_cast<uint32>(31 ^ std::countl_zero(value | 1u));
+    return static_cast<uint32_t>(31 ^ std::countl_zero(value | 1u));
 }
 
-uint32 BitOperations::Log2(uint64 value)
+uint32_t BitOperations::Log2(uint64_t value)
 {
-    return static_cast<uint32>(31 ^ std::countl_zero(value | 1u));
+    return static_cast<uint32_t>(31 ^ std::countl_zero(value | 1u));
 }
 
-uint32 BitOperations::PopCount(uint32 value)
+uint32_t BitOperations::PopCount(uint32_t value)
 {
-    return static_cast<uint32>(std::popcount(value));
+    return static_cast<uint32_t>(std::popcount(value));
 }
 
-uint32 BitOperations::PopCount(uint64 value)
+uint32_t BitOperations::PopCount(uint64_t value)
 {
-    return static_cast<uint32>(std::popcount(value));
+    return static_cast<uint32_t>(std::popcount(value));
 }
 
-uint32 BitOperations::ReverseBits(uint32 value)
+uint32_t BitOperations::ReverseBits(uint32_t value)
 {
     // std::byteswap is C++23, so we implement a manual bit reversal for compatibility with earlier standards.
 #if defined(__clang__)
@@ -104,7 +104,7 @@ uint32 BitOperations::ReverseBits(uint32 value)
 #endif
 }
 
-uint64 BitOperations::ReverseBits(uint64 value)
+uint64_t BitOperations::ReverseBits(uint64_t value)
 {
     // std::byteswap is C++23, so we implement a manual bit reversal for compatibility with earlier standards.
 #if defined(__clang__)
@@ -129,47 +129,47 @@ uint64 BitOperations::ReverseBits(uint64 value)
 #endif
 }
 
-uint32 BitOperations::RotateLeft(uint32 value, uint32 offset)
+uint32_t BitOperations::RotateLeft(uint32_t value, uint32_t offset)
 {
     return std::rotl(value, static_cast<int>(offset));
 }
 
-uint64 BitOperations::RotateLeft(uint64 value, uint32 offset)
+uint64_t BitOperations::RotateLeft(uint64_t value, uint32_t offset)
 {
     return std::rotl(value, static_cast<int>(offset));
 }
 
-uint32 BitOperations::RotateRight(uint32 value, uint32 offset)
+uint32_t BitOperations::RotateRight(uint32_t value, uint32_t offset)
 {
     return std::rotr(value, static_cast<int>(offset));
 }
 
-uint64 BitOperations::RotateRight(uint64 value, uint32 offset)
+uint64_t BitOperations::RotateRight(uint64_t value, uint32_t offset)
 {
     return std::rotr(value, static_cast<int>(offset));
 }
 
-uint32 BitOperations::TrailingZeroCount(uint32 value)
+uint32_t BitOperations::TrailingZeroCount(uint32_t value)
 {
-    return static_cast<uint32>(std::countr_zero(value));
+    return static_cast<uint32_t>(std::countr_zero(value));
 }
 
-uint32 BitOperations::TrailingZeroCount(uint64 value)
+uint32_t BitOperations::TrailingZeroCount(uint64_t value)
 {
-    return static_cast<uint32>(std::countr_zero(value));
+    return static_cast<uint32_t>(std::countr_zero(value));
 }
 
-uint32 BitOperations::SingleToUInt32Bits(float value)
+uint32_t BitOperations::SingleToUInt32Bits(float value)
 {
-    return std::bit_cast<uint32>(value);
+    return std::bit_cast<uint32_t>(value);
 }
 
-float BitOperations::UInt32BitsToSingle(uint32 value)
+float BitOperations::UInt32BitsToSingle(uint32_t value)
 {
     return std::bit_cast<float>(value);
 }
 
-double BitOperations::UInt64BitsToDouble(uint64 value)
+double BitOperations::UInt64BitsToDouble(uint64_t value)
 {
     return std::bit_cast<double>(value);
 }

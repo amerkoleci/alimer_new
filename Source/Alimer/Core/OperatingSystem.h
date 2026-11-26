@@ -50,7 +50,7 @@ namespace Alimer
 
         /// Indicates whether the current application is running on Windows.
         [[nodiscard]] static bool IsWindows();
-        [[nodiscard]] static bool IsWindowsVersionAtLeast(int32 major, int32 minor = 0, int32 build = 0, int32 revision = 0);
+        [[nodiscard]] static bool IsWindowsVersionAtLeast(int32_t major, int32_t minor = 0, int32_t build = 0, int32_t revision = 0);
 
         /// Indicates whether the current application is running as WASM in a Browser.
         [[nodiscard]] static bool IsBrowser();
@@ -62,28 +62,28 @@ namespace Alimer
         [[nodiscard]] static bool IsAndroid();
 
         /// Check for the Android API level (returned by 'ro.build.version.sdk') with a >= version comparison. Used to guard APIs that were added in the given Android release.
-        [[nodiscard]] static bool IsAndroidVersionAtLeast(int32 major, int32 minor = 0, int32 build = 0, int32 revision = 0);
+        [[nodiscard]] static bool IsAndroidVersionAtLeast(int32_t major, int32_t minor = 0, int32_t build = 0, int32_t revision = 0);
 
         /// Indicates whether the current application is running on iOS or MacCatalyst.
         [[nodiscard]] static bool IsIOS();
 
         /// Check for the iOS version with a >= version comparison. Used to guard APIs that were added in the given iOS release.
-        [[nodiscard]] static bool IsIOSVersionAtLeast(int32 major, int32 minor = 0, int32 build = 0, int32 revision = 0);
+        [[nodiscard]] static bool IsIOSVersionAtLeast(int32_t major, int32_t minor = 0, int32_t build = 0, int32_t revision = 0);
 
         /// Indicates whether the current application is running on macOS.
         [[nodiscard]] static bool IsMacOS();
 
-        [[nodiscard]] static bool IsMacOSVersionAtLeast(int32 major, int32 minor = 0, int32 build = 0);
+        [[nodiscard]] static bool IsMacOSVersionAtLeast(int32_t major, int32_t minor = 0, int32_t build = 0);
 
         /// Indicates whether the current application is running on Mac Catalyst.
         [[nodiscard]] static bool IsMacCatalyst();
 
         /// Check for the Mac Catalyst version (iOS version as presented in Apple documentation) with a >= version comparison. Used to guard APIs that were added in the given Mac Catalyst release.
-        [[nodiscard]] static bool IsMacCatalystVersionAtLeast(int major, int minor = 0, int build = 0);
+        [[nodiscard]] static bool IsMacCatalystVersionAtLeast(int32_t major, int32_t minor = 0, int32_t build = 0);
 
         [[nodiscard]] static uint32_t GetNumPhysicalCPUs();
 
     private:
-        [[nodiscard]] static bool IsOSVersionAtLeast(int32 major, int32 minor, int32 build, int32 revision);
+        [[nodiscard]] static bool IsOSVersionAtLeast(int32_t major, int32_t minor, int32_t build, int32_t revision);
     };
 }

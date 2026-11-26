@@ -101,18 +101,8 @@ inline constexpr bool operator !=(EnumType a, std::underlying_type<EnumType>::ty
 
 namespace Alimer
 {
-    // =======================================================================
-    // Fundamental integer / floating types
-    // =======================================================================
-    using int8 = std::int8_t;
-    using int16 = std::int16_t;
-    using int32 = std::int32_t;
-    using int64 = std::int64_t;
-
-    using uint8 = std::uint8_t;
-    using uint16 = std::uint16_t;
-    using uint32 = std::uint32_t;
-    using uint64 = std::uint64_t;
+    // 16 bit floating point number consisting of a sign bit, a 5 bit biased exponent, and a 10 bit mantissa
+    using Half = uint16_t;
 
     // =======================================================================
     // String types
@@ -120,14 +110,14 @@ namespace Alimer
     using String = std::string;
     using StringView = std::string_view;
 
-    static constexpr uint32 kConversionBufferLength = 128;
-    static constexpr uint32 kMatrixConversionBufferLength = 256;
+    static constexpr uint32_t kConversionBufferLength = 128;
+    static constexpr uint32_t kMatrixConversionBufferLength = 256;
 
     /// Integer format represents time using 10,000,000 ticks per second.
-    static constexpr uint64 TicksPerSecond = 10000000;
+    static constexpr uint64_t TicksPerSecond = 10000000;
 
-    static constexpr double TicksToSeconds(uint64 ticks) noexcept { return static_cast<double>(ticks) / TicksPerSecond; }
-    static constexpr uint64 SecondsToTicks(double seconds) noexcept { return static_cast<uint64>(seconds * TicksPerSecond); }
+    static constexpr double TicksToSeconds(uint64_t ticks) noexcept { return static_cast<double>(ticks) / TicksPerSecond; }
+    static constexpr uint64_t SecondsToTicks(double seconds) noexcept { return static_cast<uint64_t>(seconds * TicksPerSecond); }
 
     //---------------------------------------------
     // Limits

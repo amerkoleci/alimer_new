@@ -6,7 +6,7 @@
 
 using namespace Alimer;
 
-int32 Version::CompareTo(const Version& value) const
+int32_t Version::CompareTo(const Version& value) const
 {
     return
         major != value.major ? (major > value.major ? 1 : -1) :

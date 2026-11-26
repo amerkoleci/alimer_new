@@ -49,40 +49,40 @@ namespace Alimer::BitOperations
     }
 
     /// Rounds the specified value up to a power of two.
-    ALIMER_API uint32 RoundUpToPowerOf2(uint32 value) noexcept;
+    ALIMER_API uint32_t RoundUpToPowerOf2(uint32_t value) noexcept;
 
     /// Rounds the specified value up to a power of two.
-    ALIMER_API uint64 RoundUpToPowerOf2(uint64 value) noexcept;
+    ALIMER_API uint64_t RoundUpToPowerOf2(uint64_t value) noexcept;
 
-    ALIMER_API uint32 BitScanForward(uint32 value);
-    ALIMER_API uint32 BitScanForward(uint64 value);
-    ALIMER_API uint32 BitScanReverse(uint32 value);
-    ALIMER_API uint32 BitScanReverse(uint64 value);
+    ALIMER_API uint32_t BitScanForward(uint32_t value);
+    ALIMER_API uint32_t BitScanForward(uint64_t value);
+    ALIMER_API uint32_t BitScanReverse(uint32_t value);
+    ALIMER_API uint32_t BitScanReverse(uint64_t value);
 
-    ALIMER_API uint32 LeadingZeroCount(uint32 value);
-    ALIMER_API uint32 LeadingZeroCount(uint64  value);
+    ALIMER_API uint32_t LeadingZeroCount(uint32_t value);
+    ALIMER_API uint32_t LeadingZeroCount(uint64_t value);
 
-    ALIMER_API uint32 Log2(uint32 value);
-    ALIMER_API uint32 Log2(uint64 value);
+    ALIMER_API uint32_t Log2(uint32_t value);
+    ALIMER_API uint32_t Log2(uint64_t value);
 
-    ALIMER_API uint32 PopCount(uint32 value);
-    ALIMER_API uint32 PopCount(uint64 value);
-
-    /// Reverses the bits in an integer value
-    ALIMER_API uint32 ReverseBits(uint32 value);
+    ALIMER_API uint32_t PopCount(uint32_t value);
+    ALIMER_API uint32_t PopCount(uint64_t value);
 
     /// Reverses the bits in an integer value
-    ALIMER_API uint64 ReverseBits(uint64 value);
+    ALIMER_API uint32_t ReverseBits(uint32_t value);
 
-    ALIMER_API uint32 RotateLeft(uint32 value, uint32 offset);
-    ALIMER_API uint64 RotateLeft(uint64 value, uint32 offset);
-    ALIMER_API uint32 RotateRight(uint32 value, uint32 offset);
-    ALIMER_API uint64 RotateRight(uint64 value, uint32 offset);
+    /// Reverses the bits in an integer value
+    ALIMER_API uint64_t ReverseBits(uint64_t value);
 
-    ALIMER_API uint32 TrailingZeroCount(uint32 value);
-    ALIMER_API uint32 TrailingZeroCount(uint64 value);
+    ALIMER_API uint32_t RotateLeft(uint32_t value, uint32_t offset);
+    ALIMER_API uint64_t RotateLeft(uint64_t value, uint32_t offset);
+    ALIMER_API uint32_t RotateRight(uint32_t value, uint32_t offset);
+    ALIMER_API uint64_t RotateRight(uint64_t value, uint32_t offset);
 
-    ALIMER_API uint32 SingleToUInt32Bits(float value);
-    ALIMER_API float UInt32BitsToSingle(uint32 value);
-    ALIMER_API double UInt64BitsToDouble(uint64 value);
+    ALIMER_API uint32_t TrailingZeroCount(uint32_t value);
+    ALIMER_API uint32_t TrailingZeroCount(uint64_t value);
+
+    ALIMER_API uint32_t SingleToUInt32Bits(float value);
+    ALIMER_API float UInt32BitsToSingle(uint32_t value);
+    ALIMER_API double UInt64BitsToDouble(uint64_t value);
 }
